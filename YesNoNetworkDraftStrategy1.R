@@ -82,16 +82,19 @@ readDataframe <- function(filename) {
   df <- readDataframe(filename)
   #read in the mtDNA presence/absence categories
   
-  #Strategy1<- read.csv( paste(directory, "trajsWithAtLeastOnemtDNA_Contrast_",filename,".csv",sep="")) 
+
+ # Strategy1<- read.csv( paste(directory, "trajsWithAtLeastOnemtDNA_Contrast_",filename,".csv",sep="")) 
   #Strategy2a<- read.csv( paste(directory, "trajsatLeastOneAdjacentmtDNA_Contrast_",filename,".csv",sep=""))
-  #Strategy2b<- read.csv( paste(directory, "trajsatLeastThreeAdjacentmtDNA_Contrast_",filename,".csv",sep=""))
-  #Strategy1.m<- read.csv( paste(directory, "trajsWithAtLeastOnemtDNA_Maxima_",filename,".csv",sep="")) 
-  Strategy2a.m<- read.csv( paste(directory, "trajsatLeastOneAdjacentmtDNA_Maxima_",filename,".csv",sep=""))
-  #Strategy2b.m<- read.csv( paste(directory, "trajsatLeastThreeAdjacentmtDNA_Maxima_",filename,".csv",sep=""))
-  #StrategyList<-list(Strategy1,Strategy2a,Strategy2b,Strategy1.m,Strategy2a.m,Strategy2b.m)
-  #StrategyListNames<-c("Strategy1","Strategy2a","Strategy2b","Strategy1.m","Strategy2a.m","Strategy2b.m")
-  StrategyList<-list(Strategy2a.m)
-  StrategyListNames<-c("Strategy2a.m")
+# Strategy2b<- read.csv( paste(directory, "trajsatLeastThreeAdjacentmtDNA_Contrast_",filename,".csv",sep=""))
+ # Strategy1.m<- read.csv( paste(directory, "trajsWithAtLeastOnemtDNA_Maxima_",filename,".csv",sep="")) 
+ Strategy2a.m<- read.csv( paste(directory, "trajsatLeastOneAdjacentmtDNA_Maxima_",filename,".csv",sep=""))
+  ##Strategy2b.m<- read.csv( paste(directory, "trajsatLeastThreeAdjacentmtDNA_Maxima_",filename,".csv",sep=""))
+ # StrategyList<-list(Strategy1,Strategy2a,Strategy2b,Strategy1.m,Strategy2a.m,Strategy2b.m)
+ # StrategyListNames<-c("Strategy1","Strategy2a","Strategy2b","Strategy1.m","Strategy2a.m","Strategy2b.m")
+  stratFile<-Strategy2a.m
+  strategyListName<-c("Strategy2a.m")
+  
+  
   # overall stats for this dataset
   maxt = max(df$t)
   ntraj = max(df$traj)
@@ -214,18 +217,18 @@ readDataframe <- function(filename) {
       
       #let's colour the graph by mtDNA presence/absence. This does not alter stats table, 
       #that has already been written
-      for(p in 1:length(StrategyList)){
+     # for(p in 1:length(StrategyList)){
         
-        s<-StrategyList[[p]]
-        strategyListName<- StrategyListNames[p]
-        colnames(s)<- c("X","trajsInOrder", "count")
+      #  s<-StrategyList[[p]]
+       # strategyListName<- StrategyListNames[p]
+        colnames(stratFile)<- c("X","trajsInOrder", "count")
         #This match function goes through the strategy dataframe, find the nodes names the graph at that frametime uses,
         # and prints out the corresponding trajectory data from strategy
         #we need to sort out the singletons- they need presence/absence too. 
         
         
         #this is for main network
-        o<-data.frame(s[match(V(g)$name , s$trajsInOrder),], V(g)$name)
+        o<-data.frame(stratFile[match(V(g)$name , stratFile$trajsInOrder),], V(g)$name)
         trueSubset =  o[o[,3]==TRUE,2]
         trueSubset = trueSubset[!is.na(trueSubset)]
         falseSubset =  o[o[,3]==FALSE,2]
@@ -324,7 +327,7 @@ readDataframe <- function(filename) {
         degree3sCountOverFrames <- rbind(degree3sCountOverFrames, degree3s)
       
         
-      }
+     # }
     
   }
   
@@ -335,6 +338,13 @@ readDataframe <- function(filename) {
 }
 #}
 #!!!
+
+
+
+
+
+
+
 
 colnames(degree1sCountOverFrames) <-c("frame","degree","yesorno","cell")
 colnames(degree0sCountOverFrames) <-c("frame","degree","yesorno","cell")
@@ -471,14 +481,21 @@ ggsave(paste(directory,"plot-Degreeof",3,"Proportional_",strategyListName,".pdf"
 #we want to do a linear mixed effect model across all the cells.
 #we will start with degree and LCC, for networks built until the final frame of the video. 
 
+
+
+
+
+
+
+
 #first, rename columns for easier filtering
 colnames(overallDegreeYesNoframe)<- c("frame","stat","mtDNA","cell")
 colnames(overallLCCYesNoFrame)<- c("frame","LCC","mtDNA","stat","cell")
 
 #lets' plot these all data with averages, 
-#comparisonPlot fucntion with EXPORT an image too.
+#comparisonPlot function with EXPORT an image too.
 comparisonPlot<- function(inputData, anovaInput.pvalue, plotType,statLabel){
-  pVal<- anovaInput.pvalue
+  pVal<- signif(anovaInput.pvalue, digits = 3)
   
   cplot<-ggplot(data = inputData ,aes(x=mtDNA, y= stat, colour = cell)) +
     geom_jitter(alpha=0.35)+
@@ -493,18 +510,20 @@ comparisonPlot<- function(inputData, anovaInput.pvalue, plotType,statLabel){
     ) + 
     ggtitle(paste("Anova output= Pr(>ChiSq) =",pVal, "\n",
                   "n0 = ",count(inputData[inputData$mtDNA == 0,]),",",
-                  "n1 = ",count(inputData[inputData$mtDNA == 1,]),sep=" "))+ 
+                  "n1 = ",count(inputData[inputData$mtDNA == 1,]),sep=""))+ 
     ylab(statLabel)+
     theme(
       legend.text = element_text(size = 12), 
       legend.title = element_text(size = 14),
-      axis.text=element_text(size=12),
-      axis.title=element_text(size=14)
-    )
+      axis.text=element_text(size=16),
+      axis.title=element_text(size=18),
+      plot.title = element_text(size = 17)
+    ) + 
+    scale_x_continuous(breaks = c(0, 1), labels =  c("withoutmtDNA", "withmtDNA"))
   
   cplot
   
-   ggsave(paste(directory,"AllVideos-plot-", plotType, "_Deg_",statLabel,".pdf", sep=""),
+   ggsave(paste(directory,"AllVideos-plot-", plotType, "_Deg_",statLabel,"-",strategyListName,".pdf", sep=""),
         cplot, units = "cm", width= 20, height=14
       )
   
@@ -519,6 +538,8 @@ library(ggplot2)
 library(car)
 library(dplyr)
 
+frameFiltered <- 20
+frameFiltered <- 50
 frameFiltered <- 109
 comparisonPlot(inputData = overallDegreeYesNoframe %>% filter(frame == frameFiltered), 
                #old anova method
@@ -550,6 +571,8 @@ qqline(residuals(fit))
 plot(coef(outdegreeF)$cell)
 plot(coef(outdegreeO)$cell)
 
+
+##################\/\/\/\/\/###################
 frames.to.plot = c(1, 10, 20, 50 ,80, 109)
 framesName<-paste(1, 10, 20, 50 ,80, 109)
 comparisonPlot(

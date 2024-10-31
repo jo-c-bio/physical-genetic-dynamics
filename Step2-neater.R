@@ -290,14 +290,19 @@ convexHullPlotWithWithout<-function(df,dd,ntraj,directory,xmlFilename){
 }
 
 
-#this is the main function using all others, to generate one data table that gives statistics per trajectory. 
-physicalStatisticsGeneration<-function(){
+#this is the main function using all others, to generate one data table that gives statistics per trajectory.
+
+physicalStatisticsGeneration<-function(StrategyLongName,StrategyShortName){
   overallDF<-c()
   overallOki<-c()
   justoki<-c()
+  
+  strategy<-StrategyShortName
+  
   for(i in 1:length(vidList)){
     print(i)
     xmlFilename<- vidList[i]
+    strategyFile<- read.csv( paste(directory, StrategyLongName,xmlFilename,".csv",sep="")) 
     contrastThreshold <- contrastList[i]
     directory<-"/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
     df <- readDataframe(xmlFilename)
@@ -344,17 +349,13 @@ physicalStatisticsGeneration<-function(){
     subsetN = df[df$contrast <= contrastThreshold,]
     #Find out which unique trajectories pass the threshold
     yesTrajs<-unique(subsetY$traj)
+  
     
-    #Strategy2a.m<- read.csv( paste(directory, "trajsWithAllPointsPassing_Maxima_",xmlFilename,".csv",sep=""))
-    strategy<-"Strategy2a.m"
-    Strategy2a.m<- read.csv( paste(directory, "trajsatLeastOneAdjacentmtDNA_Maxima_",xmlFilename,".csv",sep=""))
-    #Strategy1<- read.csv( paste(directory, "trajsWithAtLeastOnemtDNA_Contrast_",xmlFilename,".csv",sep="")) 
-    
-    #Find out which unique trajectories pass the threshold
-    trueSubset =  Strategy2a.m[Strategy2a.m[,3]==TRUE,2]
+    #Find out which unique trajectories pass the threshold, according to the strategy we are using. 
+    trueSubset =  strategyFile[strategyFile[,3]==TRUE,2]
     yesTrajs = trueSubset[!is.na(trueSubset)]
     #dont need but might
-    falseSubset =  Strategy2a.m[Strategy2a.m[,3]==FALSE,2]
+    falseSubset =  strategyFile[strategyFile[,3]==FALSE,2]
     subsetN.a = falseSubset[!is.na(falseSubset)]
     
     print(paste("lengths are ",length(subsetY) + length(subsetN)))
@@ -409,77 +410,6 @@ physicalStatisticsGeneration<-function(){
   #return(list(overallDF,strategy))
 }
 
-ok.n<-physicalStatisticsGeneration()
-
-
-#log new table
-ok.n[[2]]$log.min.dist.everymito_perframe<-log(ok.n[[2]]$min.dist.everymito_perframe)
-#change cell column name
-names(ok.n[[2]])[names(ok.n[[2]]) == 'cellOki'] <- 'cell'
-#define strategy 
-strategy <- ok.n[[4]]
-
-
-library(ggplot2)
-library(ggpubr)
-
-
-ggplot(data = ok.n[[1]] ,aes(x=label, y= minimumDistMeanPerTraj, colour = cell)) +
-  geom_jitter(alpha=0.35)+
-  stat_summary(
-    geom = "point",
-    fun = "mean",
-    col = "white",
-    size = 3,
-    shape = 23,
-    fill = "red",
-    alpha=0.8
-  ) + ylab("Minimum intermitochondrial distance per trajectory (µm^2)") 
-
-summary(aov(minimumDistMeanPerTraj~as.factor(label)+cell, data=ok.n[[1]] ))[[1]]$`Pr(>F)`[1]
-Anova(lmer(minimumDistMeanPerTraj ~ label + (1 | cell), ok.n[[1]], REML=FALSE))
-
-ggplot(data = ok.n[[2]] ,aes(x=label, y= min.dist.everymito_perframe, colour = cell)) +
-  geom_jitter(alpha=0.35)+
-  stat_summary(
-    geom = "point",
-    fun = "mean",
-    col = "white",
-    size = 3,
-    shape = 23,
-    fill = "red",
-    alpha=0.8
-  ) + ylab("Minimum intermitochondrial distance per frame (µm^2)")
-
-summary(aov(min.dist.everymito_perframe~as.factor(label)+cell, data=ok.n[[2]] ))[[1]]$`Pr(>F)`[1]
-Anova(lmer(min.dist.everymito_perframe ~ label + (1 | cell),ok.n[[2]], REML=FALSE))
-
-ggplot(data = ok.n[[3]] ,aes(x=label, y= min.dist.everymito, colour= justokicell)) +
-  geom_jitter(alpha=0.35)+
-  stat_summary(
-    geom = "point",
-    fun = "mean",
-    col = "white",
-    size = 3,
-    shape = 23,
-    fill = "red",
-    alpha=0.8
-  )
-
-summary(aov(min.dist.everymito~as.factor(label)+justokicell, data=ok.n[[3]] ))[[1]]$`Pr(>F)`[1]
-#^ can't use these pvalues as they havent been adjusted. 
-
-
-#go back and check the colocalisation times, do they align with what the prev code gave out?
-
-#yes, same except that the data tables here have NaNs within them, that we blocked out before, 
-#these originate from us forcing coloc.time == 0 to be NA. 
-
-
-
-#lets' plot these all data with averages, 
-
-
 plotFunction<-function(dataframe, specificdata,specificdata_char, model_char,yaxis,pvaltable){
   plott <- ggplot(data = dataframe ,aes(x=label, y= specificdata, colour = cell)) +
     geom_jitter(alpha=0.35)+
@@ -507,6 +437,51 @@ plotFunction<-function(dataframe, specificdata,specificdata_char, model_char,yax
   
   return(plott)
 }
+
+
+####### Here we are running these defined functions. ########
+
+
+#ok.n<-physicalStatisticsGeneration(strategyLongName,StrategyShortName)
+  StrategyShortNames<-c("Strategy1",
+                       "Strategy2a",
+                       "Strategy2b",
+                       "Strategy1.m",
+                       "Strategy2a.m",
+                       "Strategy2b.m")
+  strategyLongNames<-c("trajsWithAtLeastOnemtDNA_Contrast_",
+                       "trajsatLeastOneAdjacentmtDNA_Contrast_",
+                       "trajsatLeastThreeAdjacentmtDNA_Contrast_",
+                       "trajsWithAtLeastOnemtDNA_Maxima_",
+                       "trajsatLeastOneAdjacentmtDNA_Maxima_",
+                       "trajsatLeastThreeAdjacentmtDNA_Maxima_")
+ok.all<-list()
+  for(s in 1:length(StrategyShortNames)){
+    ok.n<-physicalStatisticsGeneration(strategyLongNames[s],StrategyShortNames[s])
+    ok.all<-append(ok.all,ok.n)
+  }
+
+
+for(i in seq(from=1, to=24, by=4)){
+  ok.n<- ok.all[i:(i+3)]
+  print(c(i,i+1,i+2,i+3))
+
+
+
+#log new table
+ok.n[[2]]$log.min.dist.everymito_perframe<-log(ok.n[[2]]$min.dist.everymito_perframe)
+ok.n[[2]]<-ok.n[[2]] %>%  filter(log.min.dist.everymito_perframe!="-Inf")
+#change cell column name
+names(ok.n[[2]])[names(ok.n[[2]]) == 'cellOki'] <- 'cell'
+#define strategy 
+strategy <- ok.n[[4]]
+strategyName<-  ok.n[[4]]
+
+
+library(ggplot2)
+library(ggpubr)
+library(car)
+library(lme4)
 
 
 ### revamped stats- using blocking factor anova, using cell as the blocks, as it describes the known variance. 
@@ -701,34 +676,34 @@ ltdi.hist.rv<-histFunction(ok, ok$log.meanSpeedsperTraj.sumTrajDistance.,"log 2D
 ltdu.hist.rv<-histFunction(ok, ok$log.meanSpeedsperTraj.trajDuration.,"log trajectory duration (frames)")
 
 
-ggsave(paste(directory,"plot-logmeanspeed-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"plot-logmeanspeed-",strategyName,"-rv",".pdf", sep=""),
        lms.plot.rv, units = "cm", width=18,height=12)
-ggsave(paste(directory,"hist-logmeanspeed-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"hist-logmeanspeed-",strategyName,"-rv",".pdf", sep=""),
        lms.hist.rv, units = "cm", width=18,height=12)
 
-ggsave(paste(directory,"plot-logarea-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"plot-logarea-",strategyName,"-rv",".pdf", sep=""),
        la.plot.rv, units = "cm", width=18,height=12)
-ggsave(paste(directory,"hist-logarea-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"hist-logarea-",strategyName,"-rv",".pdf", sep=""),
        la.hist.rv, units = "cm", width=18,height=12)
 
-ggsave(paste(directory,"plot-logintermitoperframe-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"plot-logintermitoperframe-",strategyName,"-rv",".pdf", sep=""),
        mdpf.plot.rv, units = "cm", width=18,height=12)
-ggsave(paste(directory,"hist-logintermitoperframe-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"hist-logintermitoperframe-",strategyName,"-rv",".pdf", sep=""),
        lmdperf.hist.rv, units = "cm", width=18,height=12)
 
-ggsave(paste(directory,"plot-logcoloc-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"plot-logcoloc-",strategyName,"-rv",".pdf", sep=""),
        lct.plot.rv, units = "cm", width=18,height=12)
-ggsave(paste(directory,"hist-logcoloc-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"hist-logcoloc-",strategyName,"-rv",".pdf", sep=""),
        lct.hist.rv, units = "cm", width=18,height=12)
 
-ggsave(paste(directory,"plot-logtrajduration-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"plot-logtrajduration-",strategyName,"-rv",".pdf", sep=""),
        ltdu.plot.rv, units = "cm", width=18,height=12)
-ggsave(paste(directory,"hist-logtrajduration-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"hist-logtrajduration-",strategyName,"-rv",".pdf", sep=""),
        ltdu.hist.rv, units = "cm", width=18,height=12)
 
-ggsave(paste(directory,"plot-logtrajdistance-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"plot-logtrajdistance-",strategyName,"-rv",".pdf", sep=""),
        ltdi.plot.rv, units = "cm", width=18,height=12)
-ggsave(paste(directory,"hist-logtrajdistance-",strategy,"-rv",".pdf", sep=""),
+ggsave(paste(directory,"hist-logtrajdistance-",strategyName,"-rv",".pdf", sep=""),
        ltdi.hist.rv, units = "cm", width=18,height=12)
 
 #all the other histograms, taken from code above
@@ -743,63 +718,4 @@ ggplot(ok, aes(x=log.meanSpeedsperTraj.trajDuration., fill= label)) + geom_densi
 
 
 
-#Another graph to demonstrate those without mtDNA don't colocalise as much, also shown via degree values. 
-#Not used in manuscript.
-
-# > nrow(ok %>% filter(label == "withOutmtDNA" & coloc.traj.mean == "NaN"))
-# [1] 157
-# > nrow(ok %>% filter(label == "withmtDNA" & coloc.traj.mean == "NaN"))
-# [1] 329
-# > nrow(ok %>% filter(label == "withmtDNA" ))
-# [1] 5132
-# > nrow(ok %>% filter(label == "withOutmtDNA" ))
-# [1] 968
-# > 157/968
-# [1] 0.1621901
-# > 329/5132
-# [1] 0.06410756
-# 
-#without mtDNA theres a proportionally higher number of mitos that never colocalise?
-
-#over each cell
-proportionWithout <- c()
-proportionWith <- c()
-for (i in unique(ok$cell)) {
-  print(i)
-  print("without")
-  #for those without mtdna, whats the no. of colocalisations times == 0, divide by number of mitos without dna
-  proportionWithout <-
-    c(proportionWithout, (nrow(
-      ok %>% filter(label == "withOutmtDNA" &
-                      coloc.traj.mean == "NaN" &
-                      cell == i)
-    ) /  nrow(ok %>% filter(label == "withOutmtDNA"  & cell == i))
-    ))
-  print("with")
-  #for those with mtdna, whats the no. of colocalisations times == 0, divide by number of mitos with dna
-  proportionWith <-
-    c(proportionWith, (nrow(
-      ok %>% filter(label == "withmtDNA" &
-                      coloc.traj.mean == "NaN" &
-                      cell == i)
-    ) / nrow( ok %>% filter(label == "withmtDNA"  & cell == i))
-    ))
-  
 }
-
-dft <- data.frame( c(rep("proportionWith",length(proportionWith)),
-                     rep("proportionWithout",length(proportionWithout))),
-                   c(proportionWith,proportionWithout),
-                   c(unique(ok$cell),unique(ok$cell))
-)
-colnames(dft)<-c("label","proportion","cell")
-ggplot(data = dft ,aes(x=label, y= proportion )) + geom_jitter()+ stat_compare_means()+
-  stat_summary(
-    geom = "point",
-    col = "black",
-    size = 3,
-    shape = 23,
-    fill = "red",
-    alpha=0.6
-  )
-
