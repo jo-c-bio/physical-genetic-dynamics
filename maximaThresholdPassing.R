@@ -38,7 +38,7 @@ for (v in 1:length(vidList)) {
   df <- read.csv(paste(directory,"/getMaxima/",file, ".nd2/",file,"-datasetwithMaximas.txt",sep = ""))
   
   
-  #what are the proportions of trajs with 1, 2 or more frame times that cross the contrast threshold?
+  #what are the proportions of trajs with 1, 2 or more frame times that have maxima presence?
   #by definition a trajectory is at least 2 frames, so the data is dependant of how many pass that number once you get over 2 frames.
   thosewithnomtdna <- c()
   withatleast1mtDNA <- c()
