@@ -1,3 +1,8 @@
+#This script again reads in trackmate files, builds connectivity networks based on a user-defined colocalisation
+#distance in microns, and quantifies connectivity statistics of these networks.
+#Based on the selected mtDNA presence/absence definition chosen, comparisons of node degree between
+#mitos with and without mtDNA will be performed and graphs generated. 
+
 
 #need to change the files in the directories to have this name
 #vidList<-rep(paste("vid",1:10,sep=""))
@@ -43,7 +48,7 @@ library(car)
 library(RColorBrewer)
 
 
-directory<-"/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+directory<-"~/cropped/retracked28-2-24/"
 
 #empty dataframes to collect stats for over all videos
 overallDegreeYesNoframe<-c()
@@ -78,11 +83,12 @@ readDataframe <- function(filename) {
   print(v)
   filename<- vidList[v]
   contrastThreshold <- contrastList[v]
-  directory<-"/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+  directory<-"~/cropped/retracked28-2-24/"
   df <- readDataframe(filename)
   #read in the mtDNA presence/absence categories
   
-
+#Select which defintion to run by 
+  
  # Strategy1<- read.csv( paste(directory, "trajsWithAtLeastOnemtDNA_Contrast_",filename,".csv",sep="")) 
   #Strategy2a<- read.csv( paste(directory, "trajsatLeastOneAdjacentmtDNA_Contrast_",filename,".csv",sep=""))
 # Strategy2b<- read.csv( paste(directory, "trajsatLeastThreeAdjacentmtDNA_Contrast_",filename,".csv",sep=""))
@@ -337,15 +343,8 @@ readDataframe <- function(filename) {
   
 }
 #}
-#!!!
 
-
-
-
-
-
-
-
+#Rename column names
 colnames(degree1sCountOverFrames) <-c("frame","degree","yesorno","cell")
 colnames(degree0sCountOverFrames) <-c("frame","degree","yesorno","cell")
 colnames(degree3sCountOverFrames) <-c("frame","degree","yesorno","cell")
@@ -475,17 +474,11 @@ ggsave(paste(directory,"plot-Degreeof",3,"Proportional_",strategyListName,".pdf"
 
 #build, for each video, a table of degree and LCC values. 
 #However, this is not yet running over all strategy types. 
-#BUT we don;t want it to be - we need to pick one and move on. 
-#chosen MAxima use- strategy 2a- "at least one adjacent"
+#So we choose one strategy to run this over. 
+#chosen Maxima use- strategy 2a- "at least one adjacent"
 
 #we want to do a linear mixed effect model across all the cells.
 #we will start with degree and LCC, for networks built until the final frame of the video. 
-
-
-
-
-
-
 
 
 #first, rename columns for easier filtering
@@ -573,6 +566,7 @@ plot(coef(outdegreeO)$cell)
 
 
 ##################\/\/\/\/\/###################
+
 frames.to.plot = c(1, 10, 20, 50 ,80, 109)
 framesName<-paste(1, 10, 20, 50 ,80, 109)
 comparisonPlot(

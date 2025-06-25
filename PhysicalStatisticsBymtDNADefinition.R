@@ -1,6 +1,12 @@
+#This script reads in all data as trackmate files, and builds per trajectory physical statistics, such as speed, intermitochondrial distance etc.
+#It also reads corresponding contrast or maxima definition files, and compares the physical statistics of those defined as with or without
+#mtDNA (over six definitons).
+#Plots are made at the end of the script.
 
-#need to change the files in the directories to have this name
-#vidList<-rep(paste("vid",1:10,sep=""))
+
+
+#These can all be bought in as args, like allfiles in a directory, but all need corresponding contrast values.
+#if bringing in filename as entire files directory, will need to alter that below
 vidList<- c("3in1000SYBR-MS-45min002-croppedd.xml",
             "3in1000SYBR-MS-45min003-cropped.xml"	,
             "sample145mnSYBR005-cropped.xml"	,
@@ -26,11 +32,11 @@ contrastList<-
     as.numeric(0.11))
 
 
-#These can all be bought in as args, like allfiles in a directory, but all need corresponding contrast values.
-#if bringing in filename as entire files directory, will need to alter that below
 
-# this script is layed out where each physical statistic is generate in its own function,
+
+# this script is organised where each physical statistic is generate in its own function,
 #and then physicalStatisticsGeneration() is run, where the definitions are implemented.
+#This make take a while for large datasets
 #Graph generation at end of script. 
 
 library(TrackMateR)
@@ -38,7 +44,7 @@ library(dplyr)
 library(graphics)
 library(sp)
 
-directory<-"/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+directory<-"~/cropped/retracked28-2-24/"
 
 #function for reading and formatting trackmate data frames
 readDataframe <- function(xmlFilename) {
@@ -70,7 +76,6 @@ speedsFunction <- function(df, ntraj, frameTime) {
   trajDuration <- c()
   for (t in ntraj) {
     # grab trajectories from this frame
-    #JMC: SPEED WAS REPORTED PER FRAME IN JXB, NOT PER SECOND SO WE DIDN'T NEED TO INCLUDE FRAME TIME. SAME FOR ASSOCIATION TIME.
     #So here, we'll need to divide the distance by the frame time.
     subset = df[df$traj == t, ]
     
@@ -302,9 +307,9 @@ physicalStatisticsGeneration<-function(StrategyLongName,StrategyShortName){
   for(i in 1:length(vidList)){
     print(i)
     xmlFilename<- vidList[i]
+    directory<-"~/cropped/retracked28-2-24/"
     strategyFile<- read.csv( paste(directory, StrategyLongName,xmlFilename,".csv",sep="")) 
     contrastThreshold <- contrastList[i]
-    directory<-"/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
     df <- readDataframe(xmlFilename)
     # overall stats for this dataset
     maxt = max(df$t)
@@ -368,7 +373,7 @@ physicalStatisticsGeneration<-function(StrategyLongName,StrategyShortName){
     
     #this little section is for calculating minimum mitochondrial distance between each mito in each traj at one frame. 
     #first need to label them by positive or negative
-    #  #
+    #  
     oki$label <-"withOutmtDNA"
     ddd<-oki$traj[(oki$traj %in% yesTrajs)]
     oki$label[ which(oki$traj %in% ddd)]<-"withmtDNA"
@@ -489,7 +494,7 @@ library(lme4)
 ok<-ok.n[[1]]
 
 #two ways to do it , 
-#but I htink think first, using aov() won't work correctly as  you need to wrap them in Error(), 
+#but I think first, using aov() won't work correctly as  you need to wrap them in Error(), 
 #and your data has to be balanced, i.e. have equal replication across all treatment.
 #so, using the lmer() function to specify the correct block as random 
 
@@ -600,7 +605,6 @@ ggplot(ok, aes(x=meanSpeeds, fill= label)) + geom_density(alpha = 0.2)
 #logspeed
 lms.plot.rv<-plotFunction( ok, ok$log.meanSpeedsperTraj.meanSpeeds.,"log.meanSpeedsperTraj.meanSpeeds.", "outlogspeed","log mean speed per trajectory (µm/s)",DFadjustedP.rv)
 lms.hist.rv<-ggplot(ok, aes(x=log.meanSpeedsperTraj.meanSpeeds., fill= label)) + geom_density(alpha = 0.2)
-
 
 
 #mindists PER TRAJ

@@ -1,3 +1,7 @@
+#This script correlates 'Find Maxima' outputs from ImageJ with the positions of mitochondria 
+#found using trackmate, by utilising the draw.circle function based on trackmate spot radius. 
+
+
 ##install.packages("plotrix")
 ##install.packages("sp")
 library(sp)
@@ -8,7 +12,6 @@ library(igraph)
 library(brainGraph)
 library(ggpubr)
 library(ggplot2)
-
 
 #Functions
 
@@ -152,7 +155,7 @@ for(i in 1:length(vidList)) {
   file <- strsplit(vidList[i], "\\.")[[1]][1]
   filename <- vidList[i]
   directory <-
-    "/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+    "~/cropped/retracked28-2-24/"
 
   df <- readDataframe(filename)
   

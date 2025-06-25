@@ -1,4 +1,10 @@
-#Contrast threshold passing script, but edited to use maxima as the evidence for mtDNA presence
+#The same idea as the contrast threshold passing script, 
+#but edited to use maxima as the evidence for mtDNA presence.
+#The script takes in dataframes generated from the usingMaxima.R file,
+#Which gives a binary indicator as to whether each mito at each time point has a maxima point associated with it.
+
+#Output: .csv files of trajectories with true/false values based on whether they pass the definition.
+#A bar chart quantifying the number of trajectories passing for each definition. 
 
 
 #need to change the files in the directories to have this name
@@ -25,7 +31,7 @@ library(brainGraph)
 
 
 directory <-
-  "/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+  "~/cropped/retracked28-2-24/"
 
 
 matrix.totals <- c()
@@ -34,7 +40,7 @@ for (v in 1:length(vidList)) {
   filename <- vidList[v]
   file <- strsplit(as.character(vidList[v]), "\\.")[[1]][1]
   directory <-
-    "/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+    "~/cropped/retracked28-2-24/"
   df <- read.csv(paste(directory,"/getMaxima/",file, ".nd2/",file,"-datasetwithMaximas.txt",sep = ""))
   
   

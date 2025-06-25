@@ -5,7 +5,7 @@ mypalette = c("#0073C2FF", "#00A36C", "#868686FF","#FFD700")
 
 #read all into a list
 #These are direct exports from the hansatech software, as .csv format. 
-setwd("/Users/joannachustecki/Documents/PostDoc23-Data/OxygenElectrodeProper26-7-24/")
+setwd("~/OxygenElectrodeProper26-7-24/")
 temp = list.files(pattern="\\.csv$")
 myfiles=  lapply(temp, read.csv, skip = 27, header = F, row.names=NULL)
 

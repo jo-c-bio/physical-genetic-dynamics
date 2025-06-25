@@ -1,7 +1,7 @@
 //looping over all images in a time series
 // finding maxima to count mtDNA 
 // jmc 01-04-24
-//need to open which file you're going to work on before running this code
+//need to open which image file you're going to work on before running this code
 
 t= getTitle();
 count= getDirectory("folder for results");
@@ -14,12 +14,11 @@ File.makeDirectory(folder2);
 
 run("Duplicate...", "duplicate channels=1");
 
-//which prominence do we want this get maxima to run over, can use output of test below to alter this. 
+//which prominence do we want this get maxima to run over, use the output of test below to set this. 
 prominenC = 300;
 
 for (i = 1; i <= nSlices; i++) {
     setSlice(i);
-    // do something here;
     // Prominence may need changing for each video!!
     run("Find Maxima...", "prominence=prominenC strict output=List");
  	saveAs("Results", folder2 +  File.separator + i + "-" + "MaximaCoordsP" + prominenC + ".csv");
@@ -31,7 +30,7 @@ close();
 
 
 
-// this code takes you image, runs Find maxima and prints the points over the top, saving the image so we can
+// this code takes your image, runs Find maxima and prints the foci points over the top, saving the image so we can
 // manually check the prominences in a given range, and choose the correct one. 
 prom_start = 150;
 prom_stop = 500;

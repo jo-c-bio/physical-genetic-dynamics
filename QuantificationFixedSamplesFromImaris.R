@@ -1,5 +1,6 @@
 #mtDNA quantification from fixed cells
-#This data comes exported from Imaris- I chose the strictest and easiest definition of 'mtDNA presence'
+#This data comes exported from Imaris- I chose the strictest and easiest definition of 'mtDNA presence'.
+#I.e only those with foci WITHIN the segmented mitochondrion boundary passed.
 #Using the pre-set filter of stats-> detailed-> 'nucleus number of vesicles VesicleType=vesicles mtDNA', for each sample
 
 #Data Input
@@ -10,7 +11,7 @@
 ########################################################################
 
 library(dplyr)
-setwd("/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/round2")
+setwd("~/nucleoidQuantification/round2")
 
 #epidermal cell vols
 for(i in c(1:6,8:12)){
@@ -52,7 +53,7 @@ for(i in c(1:6,8:12)){
 #Then we can collect the hypocotyl data
 ##############################################
 
-setwd("/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/round2/")
+setwd("~/nucleoidQuantification/round2/")
 
 #might need to remove 5 and 7- they have a much higher resolution, 
 #10.7501 pixels per micron compared to 4.8272 for the rest. 

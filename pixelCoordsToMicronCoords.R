@@ -1,10 +1,10 @@
 #getMaxima data table processing. 
 
 #slightly awkward output for the coordinates of the maxima points out of imagej macro.
-#Awkward because they are in pixel coordinates instead of micron coordinates like Trcakmate uses.
+#Awkward because they are in pixel coordinates instead of micron coordinates like Trackmate uses.
 #the resolution is the same across all ten videos, so we will just divide every number by that and export again. 
 
-setwd("/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/getMaxima")
+setwd("~/cropped/retracked28-2-24/getMaxima")
 #read all the .csv files in the getMaxima directory
 filelist <- list.files(pattern = ".csv", recursive = TRUE, full.names = TRUE)
 

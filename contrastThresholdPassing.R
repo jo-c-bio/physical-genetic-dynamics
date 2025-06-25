@@ -1,5 +1,10 @@
-#Lets start again
-
+#This script takes your generated Trackmate files, as well as specified contrast values,
+#to look for individual frames per track where the signal for a certain channel, here the SYBR/GFP channel,
+#passes a contrast threshold. 
+#Four definitions are sought, those with no contrast signal over the threshold, and those with only 1, 2 or 2 or more 
+#threshold passes in consecutive frame times. 
+#Output: .csv files of trajectories with true/false values based on whether they pass the definition.
+#A bar chart quantifying the number of trajectories passing for each definition. 
 
 #need to change the files in the directories to have this name
 #vidList<-rep(paste("vid",1:10,sep=""))
@@ -36,10 +41,8 @@ library(igraph)
 library(brainGraph)
 
 
-#MAKE THIS CODE RUN OVER ALL VIDEOS
-
 directory <-
-  "/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+  "~/Cropped/retracked28-2-24/"
 
 readDataframe <- function(filename) {
   tmObj <-
@@ -86,7 +89,7 @@ for (i in 1:length(vidList)) {
   filename <- vidList[i]
   contrastThreshold <- contrastList[i]
   directory <-
-    "/Users/joannachustecki/Documents/PostDoc23-Data/nucleoidQuantification/currentDecentTimelapseSYBR/cropped/retracked28-2-24/"
+    "~/cropped/retracked28-2-24/"
   df <- readDataframe(filename)
   
   
