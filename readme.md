@@ -16,7 +16,7 @@ Matrix\
 car\
 RColorBrewer\
 tidyr\
-ggplot2\
+ggplot2
 
 
 Following imaging in one plane and tracking of mitochondria using Trackmate, trackmate files in .xml format will be generated. 
